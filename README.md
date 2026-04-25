@@ -45,6 +45,3 @@ PrepTrack is a production-grade, AI-integrated full-stack web application built 
 - **Weekly Plan Generation**: AI generates structured 7-day study plans.
 - **Gamified Planner**: Daily targets, streaks, and XP points.
 - **Premium UI**: Glassmorphism, animated gradients, mesh backgrounds.
-
-## Deployment
-When deploying to Vercel, ensure all environment variables are correctly mapped in the Vercel dashboard. Supabase RLS will automatically secure data per user.
