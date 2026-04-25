@@ -28,11 +28,9 @@ export default function CTASection() {
             Join the ranks of organized, stress-free aspirants. Create your account, set your target, and let PrepTrack guide your daily study.
           </p>
           
-          <Link href="/signup">
-            <Button size="lg" className="px-10 py-4 text-lg shadow-[0_0_40px_var(--accent-glow)] rounded-xl">
-              Create Free Account
-            </Button>
-          </Link>
+          <Button href="/signup" size="lg" className="px-10 py-4 text-lg shadow-[0_0_40px_var(--accent-glow)] rounded-xl">
+            Create Free Account
+          </Button>
           <p className="mt-6 text-sm text-[var(--text-muted)]">
             No credit card required. Free tier includes syllabus tracking and basic analytics.
           </p>

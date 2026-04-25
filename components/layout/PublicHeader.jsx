@@ -80,12 +80,8 @@ export default function PublicHeader() {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-3">
-            <Link href="/login">
-              <Button variant="ghost" size="sm">Log in</Button>
-            </Link>
-            <Link href="/signup">
-              <Button size="sm" icon={ChevronRight}>Get Started</Button>
-            </Link>
+            <Button href="/login" variant="ghost" size="sm">Log in</Button>
+            <Button href="/signup" size="sm" icon={ChevronRight}>Get Started</Button>
           </div>
 
           {/* Mobile Menu Toggle */}
@@ -128,12 +124,8 @@ export default function PublicHeader() {
                 </Link>
               ))}
               <div className="flex gap-3 mt-4 pt-4 border-t border-[var(--border)]">
-                <Link href="/login" className="flex-1">
-                  <Button variant="secondary" className="w-full">Log in</Button>
-                </Link>
-                <Link href="/signup" className="flex-1">
-                  <Button className="w-full">Sign up</Button>
-                </Link>
+                <Button href="/login" variant="secondary" className="flex-1 w-full">Log in</Button>
+                <Button href="/signup" className="flex-1 w-full">Sign up</Button>
               </div>
             </nav>
           </motion.div>

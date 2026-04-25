@@ -74,16 +74,12 @@ export default function HeroSection() {
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/signup">
-              <Button size="lg" className="w-full sm:w-auto shadow-[0_0_30px_var(--accent-glow)]">
-                Get Started Free
-              </Button>
-            </Link>
-            <Link href="#how-it-works">
-              <Button size="lg" variant="ghost" className="w-full sm:w-auto">
-                See How It Works
-              </Button>
-            </Link>
+            <Button href="/signup" size="lg" className="w-full sm:w-auto shadow-[0_0_30px_var(--accent-glow)]">
+              Get Started Free
+            </Button>
+            <Button href="#how-it-works" size="lg" variant="ghost" className="w-full sm:w-auto">
+              See How It Works
+            </Button>
           </div>
         </motion.div>
       </div>

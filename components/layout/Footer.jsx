@@ -15,13 +15,13 @@ const footerLinks = {
   company: [
     { label: 'About Us', href: '/about' },
     { label: 'Contact', href: '/contact' },
-    { label: 'Blog', href: '#' },
-    { label: 'Careers', href: '#' },
+    { label: 'Blog', href: '/coming-soon' },
+    { label: 'Careers', href: '/coming-soon' },
   ],
   resources: [
-    { label: 'UPSC Guide', href: '#' },
-    { label: 'JEE Tips', href: '#' },
-    { label: 'NEET Strategy', href: '#' },
+    { label: 'UPSC Guide', href: '/coming-soon' },
+    { label: 'JEE Tips', href: '/coming-soon' },
+    { label: 'NEET Strategy', href: '/coming-soon' },
     { label: 'Study Materials', href: '/resources' },
   ],
 };
@@ -123,23 +123,23 @@ export default function Footer() {
             © {new Date().getFullYear()} PrepTrack. All rights reserved.
           </p>
           <div className="flex items-center gap-4">
-            <a href="#" className="text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors" aria-label="Community">
+            <a href="/coming-soon" className="text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors" aria-label="Community">
               <MessageCircle size={18} />
             </a>
-            <a href="#" className="text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors" aria-label="Careers">
+            <a href="/coming-soon" className="text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors" aria-label="Careers">
               <Briefcase size={18} />
             </a>
-            <a href="#" className="text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors" aria-label="Developers">
+            <a href="/coming-soon" className="text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors" aria-label="Developers">
               <Code size={18} />
             </a>
-            <a href="#" className="text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors" aria-label="Email">
+            <a href="/coming-soon" className="text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors" aria-label="Email">
               <Mail size={18} />
             </a>
           </div>
           <div className="flex items-center gap-4 text-xs text-[var(--text-muted)]">
-            <a href="#" className="hover:text-[var(--text-secondary)] transition-colors">Terms</a>
-            <a href="#" className="hover:text-[var(--text-secondary)] transition-colors">Privacy</a>
-            <a href="#" className="hover:text-[var(--text-secondary)] transition-colors">Cookies</a>
+            <a href="/coming-soon" className="hover:text-[var(--text-secondary)] transition-colors">Terms</a>
+            <a href="/coming-soon" className="hover:text-[var(--text-secondary)] transition-colors">Privacy</a>
+            <a href="/coming-soon" className="hover:text-[var(--text-secondary)] transition-colors">Cookies</a>
           </div>
         </div>
       </div>
