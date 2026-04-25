@@ -1,6 +1,6 @@
 import { Toaster } from 'react-hot-toast';
 import { UserProvider } from '@/hooks/useUser';
-import '../globals.css';
+import './globals.css';
 
 export const metadata = {
   title: 'PrepTrack | Your Exam Command Center',

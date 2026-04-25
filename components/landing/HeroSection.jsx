@@ -7,22 +7,34 @@ import Button from '@/components/ui/Button';
 
 export default function HeroSection() {
   const [text, setText] = useState('');
+  const [particles, setParticles] = useState([]);
   const fullText = 'Your Exam. Your Command Center.';
-  
+
+  useEffect(() => {
+    setParticles(
+      Array.from({ length: 25 }).map(() => ({
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 100}%`,
+        animationDelay: `${Math.random() * 5}s`,
+        animationDuration: `${10 + Math.random() * 20}s`,
+      }))
+    );
+  }, []);
+
   useEffect(() => {
     let currentText = '';
     let index = 0;
-    
+
     const intervalId = setInterval(() => {
       currentText += fullText[index];
       setText(currentText);
       index++;
-      
+
       if (index === fullText.length) {
         clearInterval(intervalId);
       }
     }, 100); // 100ms per character typing speed
-    
+
     return () => clearInterval(intervalId);
   }, []);
 
@@ -34,17 +46,8 @@ export default function HeroSection() {
       
       {/* Particles */}
       <div className="absolute inset-0 z-0 overflow-hidden">
-        {Array.from({ length: 25 }).map((_, i) => (
-          <div 
-            key={i}
-            className="particle"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${10 + Math.random() * 20}s`
-            }}
-          />
+        {particles.map((p, i) => (
+          <div key={i} className="particle" style={p} />
         ))}
       </div>
 
