@@ -24,6 +24,10 @@ create table if not exists profiles (
   created_at      timestamptz default now()
 );
 
+-- For existing profiles tables that predate the invite_code column, add it.
+-- (`create table if not exists` does not add new columns to an existing table.)
+alter table profiles add column if not exists invite_code text unique;
+
 -- Backfill invite_code on existing rows (random short slug)
 update profiles set invite_code = lower(substr(md5(random()::text), 1, 8)) where invite_code is null;
 
