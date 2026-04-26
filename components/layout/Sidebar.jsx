@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutDashboard, Map, CalendarCheck, FileText, BarChart3, Bot, BookOpen, Settings, LogOut, ChevronLeft, ChevronRight, Flame, X } from 'lucide-react';
+import { LayoutDashboard, Map, CalendarCheck, FileText, BarChart3, Bot, BookOpen, Trophy, Settings, LogOut, ChevronLeft, ChevronRight, Flame, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const menuItems = [
@@ -15,6 +15,7 @@ const menuItems = [
   { href: '/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/coach', label: 'AI Coach', icon: Bot },
   { href: '/resources', label: 'Resources', icon: BookOpen },
+  { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
 

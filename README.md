@@ -1,47 +1,76 @@
-# PrepTrack - Competitive Exam Progress OS
+# PrepTrack — Competitive Exam Progress OS
 
-PrepTrack is a production-grade, AI-integrated full-stack web application built for Indian students preparing for competitive exams (UPSC, JEE, NEET, CAT, GATE). It serves as a centralized "Operating System" to track syllabus progress, analyze mock test scores, and receive AI-powered coaching and daily study targets.
+PrepTrack is a production-grade, AI-integrated, full-stack web application for Indian students preparing for competitive exams (UPSC, JEE, NEET, CAT, GATE). It serves as a centralized "Operating System" to track syllabus progress, analyze mock-test scores, and receive AI-powered coaching, daily plans, and SMS reminders.
 
 ## Tech Stack
-- **Framework**: Next.js 14 (App Router)
-- **Styling**: Tailwind CSS + Custom CSS Variables (Obsidian Dark Theme)
-- **Database & Auth**: Supabase (PostgreSQL + RLS + Triggers)
-- **AI Integration**: Anthropic Claude 3.5 Sonnet SDK
+
+- **Framework**: Next.js 16 (App Router, Turbopack)
+- **Styling**: Tailwind CSS v4 + custom CSS variables (obsidian dark theme)
+- **Database & Auth**: Supabase (Postgres + RLS + triggers + realtime)
+- **AI**: Anthropic Claude (Sonnet 4)
+- **SMS**: Twilio
+- **Email**: Resend
 - **Animations**: Framer Motion
-- **Icons**: Lucide React
-- **Charts**: Chart.js + React-Chartjs-2
+- **Charts**: Chart.js + react-chartjs-2
+- **Command palette**: cmdk
+- **Icons**: lucide-react
 
-## Setup Instructions
+## Setup
 
-1. **Clone the repository** (or use existing files).
-2. **Install dependencies**:
+1. **Install dependencies**
    ```bash
    npm install
    ```
-3. **Environment Variables**:
-   Create a `.env.local` file in the root directory and add the following:
-   ```env
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-   ANTHROPIC_API_KEY=your_anthropic_api_key
-   
-   # Optional
-   TWILIO_ACCOUNT_SID=
-   TWILIO_AUTH_TOKEN=
-   TWILIO_PHONE_NUMBER=
+
+2. **Environment variables**
+   ```bash
+   cp .env.example .env.local
    ```
-4. **Database Setup**:
-   Run the SQL provided in `supabase/schema.sql` in your Supabase SQL Editor. This sets up the schema, RLS policies, and the profile auto-creation trigger.
-5. **Run the development server**:
+   Fill in:
+   - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` — from your Supabase project's API settings.
+   - `ANTHROPIC_API_KEY` — from console.anthropic.com.
+   - `NEXT_PUBLIC_APP_URL` — `http://localhost:3000` for local dev.
+   - Optional: `TWILIO_*` (SMS reminders) and `RESEND_API_KEY` + `RESEND_FROM_EMAIL` + `RESEND_TO_ADMIN_EMAIL` (transactional emails + contact form).
+
+3. **Database**
+   - Open Supabase SQL Editor.
+   - Run the entire contents of `supabase/schema.sql` once. (`rls-policies.sql` is now obsolete — schema.sql contains everything.)
+   - Add Google OAuth: Supabase → Auth → Providers → Google → enable + paste client ID/secret.
+   - Set Site URL: Supabase → Auth → URL Configuration → set to `http://localhost:3000` for dev (and your prod URL for production), and add `http://localhost:3000/auth/callback` to redirect URLs.
+
+4. **Run dev server**
    ```bash
    npm run dev
    ```
 
-## Key Features
+## Architecture notes
 
-- **Dynamic Syllabus Heatmap**: Hierarchical tracking of papers, subjects, and topics.
-- **Mock Test Analytics**: Log tests and visualize accuracy over time with Chart.js.
-- **Claude AI Coach**: Context-aware chat mentor that knows your progress.
-- **Weekly Plan Generation**: AI generates structured 7-day study plans.
-- **Gamified Planner**: Daily targets, streaks, and XP points.
-- **Premium UI**: Glassmorphism, animated gradients, mesh backgrounds.
+- **Auth**: cookie-based session via `@supabase/ssr`. The `proxy.js` (Next 16 replacement for `middleware.js`) refreshes the session on every request, gates protected routes, and bounces signed-in users away from auth pages. OAuth lands on `/auth/callback`, which exchanges the PKCE code for a session.
+- **API routes** (`app/api/*`) all use `createServerSupabaseClient()` so `auth.getUser()` returns the real user.
+- **Realtime profile**: `useUser` subscribes to `postgres_changes` on the `profiles` row so XP / streak updates reflect instantly across the UI (powers the level-up modal).
+- **XP & levels**: `lib/xp.js` centralizes reward amounts (5 / 10 / 15 / 20 XP) and tier thresholds (Aspirant → Scholar → Expert → Champion). The `LevelUpListener` mounted in the dashboard layout fires confetti + a celebration modal when the user crosses a threshold.
+- **Command palette**: ⌘K / Ctrl+K opens a Linear-style palette. Searches pages, quick actions, and topics in your exam syllabus.
+- **Pomodoro**: floating bottom-right widget; completed 25-minute sessions auto-log to `study_sessions` and feed the activity heatmap + streak.
+- **PWA**: `public/manifest.json` + `public/sw.js`. The service worker is registered only in production builds.
+
+## Pages
+
+- Marketing: `/`, `/about`, `/features`, `/pricing`, `/contact`
+- Auth: `/login`, `/signup`, `/reset-password`, `/auth/callback`
+- App: `/dashboard`, `/syllabus`, `/planner`, `/tests`, `/analytics`, `/coach`, `/resources`, `/leaderboard`, `/settings`
+
+## API routes
+
+- `POST /api/coach` — streaming Claude chat (cookie-authed)
+- `POST /api/weekly-plan` — structured 7-day study plan
+- `POST /api/syllabus`, `GET /api/syllabus`, `DELETE /api/syllabus` — topic-progress CRUD
+- `POST /api/reminder` — sends today's targets via Twilio
+- `POST /api/send-email` — Resend templates: `welcome`, `weekly-digest`, `contact-form`
+
+## Deployment
+
+1. Push to GitHub
+2. Import repo to Vercel (auto-detects Next.js)
+3. Add the same `.env.local` variables in Vercel → Settings → Environment Variables
+4. Update Supabase Auth → URL Configuration with your Vercel production URL + `/auth/callback`
+5. Optional: connect a custom domain

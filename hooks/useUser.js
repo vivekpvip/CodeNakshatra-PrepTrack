@@ -51,6 +51,23 @@ export function UserProvider({ children }) {
     return () => subscription.unsubscribe();
   }, [fetchProfile]);
 
+  // Subscribe to profile-row changes so XP / streak / level updates from any
+  // hook are reflected immediately (powers the level-up modal).
+  useEffect(() => {
+    if (!user?.id) return;
+    const channel = supabase
+      .channel(`profile-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` },
+        (payload) => setProfile(payload.new)
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
+
   const signOut = async () => {
     await supabase.auth.signOut();
     setUser(null);

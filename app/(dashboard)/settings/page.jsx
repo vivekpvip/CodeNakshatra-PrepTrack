@@ -2,42 +2,81 @@
 
 import { useState } from 'react';
 import { useUser } from '@/hooks/useUser';
+import { supabase } from '@/lib/supabase';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
-import { User, Bell, Shield, BookOpen, Save } from 'lucide-react';
+import ReminderSettings from '@/components/planner/ReminderSettings';
+import { User, Bell, Shield, BookOpen, Save, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 export default function SettingsPage() {
-  const { user, profile, updateProfile, loading } = useUser();
+  const router = useRouter();
+  const { user, profile, updateProfile, signOut, loading } = useUser();
   const [activeTab, setActiveTab] = useState('profile');
-  
-  const [formData, setFormData] = useState({
+
+  const [profileForm, setProfileForm] = useState({
     full_name: profile?.full_name || '',
-    phone: profile?.phone || '',
-    reminder_time: profile?.reminder_time || '07:00',
-    reminder_on: profile?.reminder_on || false,
+  });
+  const [examForm, setExamForm] = useState({
     exam_type: profile?.exam_type || 'upsc',
     exam_date: profile?.exam_date || '',
   });
+  const [confirmDelete, setConfirmDelete] = useState('');
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-  };
-
-  const handleSave = async () => {
+  const handleProfileSave = async () => {
     try {
-      await updateProfile(formData);
-      toast.success('Settings saved successfully');
-    } catch (err) {
-      toast.error('Failed to save settings');
+      await updateProfile(profileForm);
+      toast.success('Profile updated.');
+    } catch {
+      toast.error('Could not save profile.');
     }
   };
 
-  if (loading) return <div>Loading...</div>;
+  const handleExamSave = async () => {
+    try {
+      await updateProfile({
+        exam_type: examForm.exam_type,
+        exam_date: examForm.exam_date || null,
+      });
+      toast.success('Exam details updated.');
+    } catch {
+      toast.error('Could not save exam details.');
+    }
+  };
+
+  const handleResetSyllabus = async () => {
+    if (!confirm('Reset ALL syllabus progress? This cannot be undone.')) return;
+    try {
+      await supabase.from('topic_progress').delete().eq('user_id', user.id);
+      toast.success('Syllabus progress cleared.');
+    } catch {
+      toast.error('Could not reset progress.');
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (confirmDelete !== 'DELETE') {
+      return toast.error('Type DELETE to confirm.');
+    }
+    try {
+      // Profile + dependent rows cascade-delete via the `on delete cascade` FKs.
+      await supabase.from('profiles').delete().eq('id', user.id);
+      await signOut();
+      toast.success('Account data deleted. Sign in again to start over.');
+      router.push('/');
+    } catch (err) {
+      toast.error(err.message || 'Could not delete account.');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64 text-[var(--text-muted)]">
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto pb-20">
@@ -52,13 +91,13 @@ export default function SettingsPage() {
           { id: 'exam', label: 'Exam Details', icon: BookOpen },
           { id: 'notifications', label: 'Notifications', icon: Bell },
           { id: 'account', label: 'Account', icon: Shield },
-        ].map(tab => (
+        ].map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
-              activeTab === tab.id 
-                ? 'bg-[var(--bg-card)] text-[var(--text-primary)] shadow-sm' 
+              activeTab === tab.id
+                ? 'bg-[var(--bg-card)] text-[var(--text-primary)] shadow-sm'
                 : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
             }`}
           >
@@ -67,87 +106,95 @@ export default function SettingsPage() {
         ))}
       </div>
 
-      <Card>
-        {activeTab === 'profile' && (
-          <div className="space-y-6">
-            <h3 className="font-semibold text-lg border-b border-[var(--border)] pb-2">Profile Information</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="label">Full Name</label>
-                <input type="text" name="full_name" value={formData.full_name} onChange={handleChange} className="input" />
-              </div>
-              <div>
-                <label className="label">Email Address (Read-only)</label>
-                <input type="email" value={user?.email || ''} className="input opacity-50" readOnly />
-              </div>
+      {activeTab === 'profile' && (
+        <Card hover={false}>
+          <h3 className="font-semibold text-lg border-b border-[var(--border)] pb-2 mb-6">
+            Profile information
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="label">Full Name</label>
+              <input
+                type="text"
+                value={profileForm.full_name}
+                onChange={(e) => setProfileForm({ ...profileForm, full_name: e.target.value })}
+                className="input"
+              />
             </div>
-            <Button onClick={handleSave} icon={Save}>Save Profile</Button>
-          </div>
-        )}
-
-        {activeTab === 'exam' && (
-          <div className="space-y-6">
-            <h3 className="font-semibold text-lg border-b border-[var(--border)] pb-2">Exam Target</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="label">Exam Type</label>
-                <select name="exam_type" value={formData.exam_type} onChange={handleChange} className="input appearance-none">
-                  <option value="upsc">UPSC Civil Services</option>
-                  <option value="jee">JEE Main + Advanced</option>
-                  <option value="neet">NEET UG</option>
-                  <option value="cat">CAT</option>
-                  <option value="gate">GATE</option>
-                </select>
-              </div>
-              <div>
-                <label className="label">Target Date</label>
-                <input type="date" name="exam_date" value={formData.exam_date} onChange={handleChange} className="input" />
-              </div>
+            <div>
+              <label className="label">Email Address (read-only)</label>
+              <input type="email" value={user?.email || ''} className="input opacity-50" readOnly />
             </div>
-            <Button onClick={handleSave} icon={Save}>Update Exam</Button>
           </div>
-        )}
+          <div className="mt-6">
+            <Button onClick={handleProfileSave} icon={Save}>Save profile</Button>
+          </div>
+        </Card>
+      )}
 
-        {activeTab === 'notifications' && (
-          <div className="space-y-6">
-            <h3 className="font-semibold text-lg border-b border-[var(--border)] pb-2">Daily Reminders (SMS)</h3>
-            <div className="flex items-center justify-between p-4 bg-[var(--bg-tertiary)] border border-[var(--border)] rounded-lg">
-              <div>
-                <p className="font-medium text-[var(--text-primary)]">Daily Study Plan SMS</p>
-                <p className="text-sm text-[var(--text-secondary)]">Get a text message with your targets every morning.</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" name="reminder_on" checked={formData.reminder_on} onChange={handleChange} className="sr-only peer" />
-                <div className="w-11 h-6 bg-[var(--bg-secondary)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--accent)] border border-[var(--border)]"></div>
-              </label>
+      {activeTab === 'exam' && (
+        <Card hover={false}>
+          <h3 className="font-semibold text-lg border-b border-[var(--border)] pb-2 mb-6">
+            Exam target
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="label">Exam type</label>
+              <select
+                value={examForm.exam_type}
+                onChange={(e) => setExamForm({ ...examForm, exam_type: e.target.value })}
+                className="input"
+              >
+                <option value="upsc">UPSC Civil Services</option>
+                <option value="jee">JEE Main + Advanced</option>
+                <option value="neet">NEET UG</option>
+                <option value="cat">CAT</option>
+                <option value="gate">GATE</option>
+              </select>
             </div>
-            
-            {formData.reminder_on && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 border border-[var(--border-light)] rounded-lg">
-                <div>
-                  <label className="label">Phone Number (with country code)</label>
-                  <input type="tel" name="phone" placeholder="+919876543210" value={formData.phone} onChange={handleChange} className="input" />
-                </div>
-                <div>
-                  <label className="label">Delivery Time</label>
-                  <input type="time" name="reminder_time" value={formData.reminder_time} onChange={handleChange} className="input" />
-                </div>
-              </div>
-            )}
-            <Button onClick={handleSave} icon={Save}>Save Preferences</Button>
+            <div>
+              <label className="label">Target date</label>
+              <input
+                type="date"
+                value={examForm.exam_date || ''}
+                onChange={(e) => setExamForm({ ...examForm, exam_date: e.target.value })}
+                className="input"
+              />
+            </div>
           </div>
-        )}
+          <div className="mt-6 flex gap-3 flex-wrap">
+            <Button onClick={handleExamSave} icon={Save}>Update exam</Button>
+            <Button variant="secondary" onClick={handleResetSyllabus}>Reset syllabus progress</Button>
+          </div>
+        </Card>
+      )}
 
-        {activeTab === 'account' && (
-          <div className="space-y-6">
-            <h3 className="font-semibold text-lg border-b border-[var(--border)] pb-2 text-[var(--red)]">Danger Zone</h3>
-            <p className="text-sm text-[var(--text-secondary)]">Once you delete your account, there is no going back. Please be certain.</p>
-            <Button variant="danger" onClick={() => toast.error('Account deletion disabled in demo.')}>
-              Delete Account
-            </Button>
-          </div>
-        )}
-      </Card>
+      {activeTab === 'notifications' && (
+        <ReminderSettings profile={profile} onSave={updateProfile} />
+      )}
+
+      {activeTab === 'account' && (
+        <Card hover={false}>
+          <h3 className="font-semibold text-lg border-b border-[var(--border)] pb-2 mb-6 text-[var(--red)] flex items-center gap-2">
+            <AlertTriangle size={18} /> Danger zone
+          </h3>
+          <p className="text-sm text-[var(--text-secondary)] mb-4">
+            Deleting your account removes all profile data, syllabus progress, tests, and chat
+            history. This cannot be undone.
+          </p>
+          <label className="label">Type <span className="font-mono text-[var(--red)]">DELETE</span> to confirm</label>
+          <input
+            type="text"
+            value={confirmDelete}
+            onChange={(e) => setConfirmDelete(e.target.value)}
+            className="input font-mono mb-4 max-w-xs"
+            placeholder="DELETE"
+          />
+          <Button variant="danger" onClick={handleDeleteAccount} disabled={confirmDelete !== 'DELETE'}>
+            Delete account
+          </Button>
+        </Card>
+      )}
     </div>
   );
 }
