@@ -84,13 +84,13 @@ export function useTests() {
     }
   };
 
-  const getAverageScore = () => {
+  const getAverageScore = useCallback(() => {
     if (tests.length === 0) return 0;
     const sum = tests.reduce((acc, t) => acc + Number(t.percentage || 0), 0);
     return Math.round(sum / tests.length);
-  };
+  }, [tests]);
 
-  const getWeakTopics = () => {
+  const getWeakTopics = useCallback(() => {
     const topicScores = {};
     tests.forEach(test => {
       if (test.topic_tags) {
@@ -110,11 +110,11 @@ export function useTests() {
       }))
       .filter(t => t.avgScore < 60)
       .sort((a, b) => a.avgScore - b.avgScore);
-  };
+  }, [tests]);
 
-  const getRecentTests = (limit = 5) => {
+  const getRecentTests = useCallback((limit = 5) => {
     return tests.slice(0, limit);
-  };
+  }, [tests]);
 
   return {
     tests,

@@ -111,20 +111,20 @@ export function useSyllabus() {
     }
   };
 
-  const getTopicStatus = (topicId) => {
+  const getTopicStatus = useCallback((topicId) => {
     return progress[topicId]?.status || 'not_started';
-  };
+  }, [progress]);
 
-  const getTopicNotes = (topicId) => {
+  const getTopicNotes = useCallback((topicId) => {
     return progress[topicId]?.notes || '';
-  };
+  }, [progress]);
 
-  const getCompletionStats = (topics) => {
+  const getCompletionStats = useCallback((topics) => {
     const total = topics.length;
     let notStarted = 0, inProgress = 0, revised = 0;
     
     topics.forEach(topic => {
-      const status = getTopicStatus(topic.id);
+      const status = progress[topic.id]?.status || 'not_started';
       if (status === 'revised') revised++;
       else if (status === 'in_progress') inProgress++;
       else notStarted++;
@@ -138,7 +138,7 @@ export function useSyllabus() {
       completionPercent: total > 0 ? Math.round((revised / total) * 100) : 0,
       progressPercent: total > 0 ? Math.round(((revised + inProgress) / total) * 100) : 0,
     };
-  };
+  }, [progress]);
 
   return {
     progress,

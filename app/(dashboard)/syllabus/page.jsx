@@ -8,7 +8,7 @@ import SyllabusTree from '@/components/syllabus/SyllabusTree';
 import Card from '@/components/ui/Card';
 import { SkeletonCard } from '@/components/ui/Skeleton';
 import ProgressBar from '@/components/ui/ProgressBar';
-import { Search, Filter, BookOpen } from 'lucide-react';
+import { Search, Filter, BookOpen, Circle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
 

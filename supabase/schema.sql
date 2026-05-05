@@ -208,10 +208,13 @@ create policy "own_friends" on friends
 -- AUTO-CREATE PROFILE ON SIGNUP
 -- Reads OAuth provider metadata (full_name / avatar_url / picture)
 -- =====================
-create or replace function handle_new_user()
-returns trigger as $$
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer set search_path = public
+as $$
 begin
-  insert into profiles (id, full_name, avatar_url, invite_code)
+  insert into public.profiles (id, full_name, avatar_url, invite_code)
   values (
     new.id,
     coalesce(new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'name', ''),
@@ -221,12 +224,12 @@ begin
   on conflict (id) do nothing;
   return new;
 end;
-$$ language plpgsql security definer;
+$$;
 
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
-  for each row execute function handle_new_user();
+  for each row execute function public.handle_new_user();
 
 -- =====================
 -- REALTIME — push profile updates to the browser so XP/streak/level changes

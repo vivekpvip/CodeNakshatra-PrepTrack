@@ -132,15 +132,13 @@ export default function ActivityHeatmap({ targets = [] }) {
                   <div key={wIdx} className="flex flex-col gap-[3px]">
                     {week.map((day, dIdx) => (
                       <Tooltip.Root key={`${wIdx}-${dIdx}`}>
-                        <Tooltip.Trigger asChild>
-                          <div 
-                            className={cn(
-                              'w-3 h-3 rounded-[2px] transition-colors',
-                              getColorClass(day.level),
-                              day.isFuture && 'opacity-10 bg-[var(--bg-tertiary)]'
-                            )}
-                          />
-                        </Tooltip.Trigger>
+                        <Tooltip.Trigger 
+                          className={cn(
+                            'w-3 h-3 rounded-[2px] transition-colors border-none p-0 m-0 block',
+                            getColorClass(day.level),
+                            day.isFuture && 'opacity-10 bg-[var(--bg-tertiary)]'
+                          )}
+                        />
                         <Tooltip.Portal>
                           <Tooltip.Content 
                             className="bg-[var(--bg-card)] border border-[var(--border)] px-3 py-1.5 rounded text-xs text-[var(--text-primary)] shadow-xl z-50 animate-in fade-in zoom-in-95"

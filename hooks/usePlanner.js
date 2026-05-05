@@ -136,14 +136,14 @@ export function usePlanner() {
     }
   };
 
-  const getTodayTargets = () => {
+  const getTodayTargets = useCallback(() => {
     const today = new Date().toISOString().split('T')[0];
     return targets.filter(t => t.target_date === today);
-  };
+  }, [targets]);
 
-  const getTargetsByDate = (date) => {
+  const getTargetsByDate = useCallback((date) => {
     return targets.filter(t => t.target_date === date);
-  };
+  }, [targets]);
 
   return {
     targets,

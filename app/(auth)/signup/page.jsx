@@ -66,8 +66,13 @@ export default function SignupPage() {
         if (profileError) console.error('Error updating profile with exam info:', profileError);
       }
       
-      toast.success('Account created successfully! Welcome to PrepTrack.');
-      router.push('/dashboard');
+      if (data.session) {
+        toast.success('Account created successfully! Welcome to PrepTrack.');
+        router.push('/dashboard');
+      } else {
+        toast.success('Signup successful! Please check your email to confirm your account.');
+        router.push('/login');
+      }
     } catch (err) {
       toast.error(err.message || 'Failed to create account');
       console.error(err);
